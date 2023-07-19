@@ -1,20 +1,34 @@
-package org.tetris.main;
+package main;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+
+import static java.lang.System.nanoTime;
 
 public class GameLoop extends JPanel implements Runnable {
 
 
     // SCREEN SETTINGS
-    private int screenWidth = 1920;
-    private int screenHeight = 1080;
+    private final int originalTileSize = 32; // 16x16
+    private final double scalar = 1.5;
+    private final int tileSize = (int) (originalTileSize * scalar);
+
+    private int maxScreenCol = 40;
+    private int maxScreenRow = 22;
+
+    private int screenWidth = tileSize * maxScreenCol; // 1920;
+    private int screenHeight = tileSize * maxScreenRow; // 1080;
 
     // FPS
     private int targetFPS = 144;
 
     // SYSTEM
     private Thread thread;
+
+    // INTERFACE AND OBJECTS
+    public  GameInterface gameInterface = new GameInterface();
+
     public GameLoop() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.BLACK);
@@ -33,16 +47,16 @@ public class GameLoop extends JPanel implements Runnable {
 
     @Override
     public void run() {
-        long lastIterationTime = System.nanoTime();
-        long drawInterval = 1000000000 / this.targetFPS;
+        long lastIterationTime = nanoTime();
+        double drawInterval = 1000000000 / this.targetFPS;
         long now;
-        long delta = 0;
+        double delta = 0;
 
         int timer = 0;
         int drawCount = 0;
 
         while(this.thread != null) {
-            now = System.nanoTime();
+            now = nanoTime();
 
             delta += (now - lastIterationTime) / drawInterval;
             timer += (now - lastIterationTime);
@@ -50,7 +64,7 @@ public class GameLoop extends JPanel implements Runnable {
 
             if(delta >= 1) {
                 update();
-                draw();
+                repaint();
                 drawCount ++;
                 delta --;
                 if(timer >= 1000000000){
@@ -63,10 +77,11 @@ public class GameLoop extends JPanel implements Runnable {
     }
 
     public void update(){
-        System.out.println("Update!");
+        // TODO
     }
 
-    public void draw(){
-        System.out.println("Draw!");
+    public void paintComponent(Graphics g){
+        Graphics2D g2 = (Graphics2D) g;
+        this.gameInterface.draw(g2);
     }
 }
